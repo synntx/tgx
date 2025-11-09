@@ -16,9 +16,11 @@ const (
 	ParseModeHTML     = "HTML"
 )
 
-type ErrorHandler func(ctx *Context, err error)
-type Handler func(ctx *Context) error
-type callbackHandler func(ctx *CallbackContext) error
+type (
+	ErrorHandler    func(ctx *Context, err error)
+	Handler         func(ctx *Context) error
+	callbackHandler func(ctx *CallbackContext) error
+)
 
 type Bot struct {
 	token      string
@@ -88,7 +90,6 @@ func (b *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 			Message: "failed to decode webhook info",
 			Err:     err,
 		}
-
 	}
 	return &webhookInfo, nil
 }
@@ -106,7 +107,6 @@ func (b *Bot) GetMe() (*models.User, error) {
 			Message: "failed to decode webhook info",
 			Err:     err,
 		}
-
 	}
 	return &user, nil
 }
@@ -141,31 +141,28 @@ func (b *Bot) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				b.logger.Error("Panic recovered in update handler: %v", r)
-			}
-		}()
-
-		if update.Message != nil {
-			if err := b.handleMessageUpdate(update.Message); err != nil {
-				b.logger.Error("Error handling message update: %v", err)
-			}
-		} else if update.CallbackQuery != nil {
-			if err := b.handleCallbackQuery(update.CallbackQuery); err != nil {
-				b.logger.Error("Error handling callback query: %v", err)
-			}
-		} else {
-			b.logger.Warn("Received update with no message or callback query")
+	defer func() {
+		if r := recover(); r != nil {
+			b.logger.Error("Panic recovered in update handler: %v", r)
 		}
 	}()
+
+	if update.Message != nil {
+		if err := b.handleMessageUpdate(update.Message); err != nil {
+			b.logger.Error("Error handling message update: %v", err)
+		}
+	} else if update.CallbackQuery != nil {
+		if err := b.handleCallbackQuery(update.CallbackQuery); err != nil {
+			b.logger.Error("Error handling callback query: %v", err)
+		}
+	} else {
+		b.logger.Warn("Received update with no message or callback query")
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
 func (b *Bot) handleMessageUpdate(message *models.Message) error {
-
 	if message == nil {
 		return &BotError{
 			Code:    http.StatusBadRequest,
