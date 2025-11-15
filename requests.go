@@ -2,10 +2,17 @@ package tgx
 
 import "github.com/harshyadavone/tgx/models"
 
+type ParseMode string
+
+const (
+	HTML       ParseMode = "HTML"
+	MarkdownV2 ParseMode = "MarkdownV2"
+)
+
 type SendMessageRequest struct {
 	ChatId      int64       `json:"chat_id"`              // Required
 	Text        string      `json:"text"`                 // Required
-	ParseMode   string      `json:"parse_mode,omitempty"` // MarkdownV2 || HTML
+	ParseMode   ParseMode   `json:"parse_mode,omitempty"` // MarkdownV2 || HTML
 	ReplyMarkup ReplyMarkup `json:"reply_markup,omitempty"`
 	ReplyParams *ReplyParam `json:"reply_paramaters,omitempty"`
 }
@@ -39,7 +46,7 @@ type CopyMessageRequest struct {
 	FromChatId            int64        `json:"from_chat_id"` // Required
 	MessageId             int64        `json:"message_id"`   // Required
 	Caption               string       `json:"caption"`
-	ParseMode             string       `json:"parse_mode"`
+	ParseMode             ParseMode    `json:"parse_mode"`
 	ShowCaptionAboveMedia bool         `json:"show_caption_above_media"`
 	AllowPaidBroadCast    bool         `json:"allow_paid_broadcast"`
 	DisableNotification   bool         `json:"disable_notification"`
@@ -60,7 +67,7 @@ type CopyMessagesRequest struct {
 type BaseMediaRequest struct {
 	ChatId              int64       `json:"chat_id"`                // Required
 	Caption             string      `json:"caption,omitempty"`      // Optional
-	ParseMode           string      `json:"parse_mode,omitempty"`   // Optional
+	ParseMode           ParseMode   `json:"parse_mode,omitempty"`   // Optional
 	ReplyMarkup         ReplyMarkup `json:"reply_markup,omitempty"` // Optional
 	ReplyParams         *ReplyParam `json:"reply_parameters,omitempty"`
 	DisableNotification bool        `json:"disable_notification,omitempty"`
@@ -148,15 +155,15 @@ type SendMediaGroupRequest struct {
 
 // InputMedia represents a single media in the group
 type InputMedia struct {
-	Type              string `json:"type"`  // "photo", "video", etc.
-	Media             string `json:"media"` // file_id or "attach://<file_name>"
-	Caption           string `json:"caption,omitempty"`
-	ParseMode         string `json:"parse_mode,omitempty"`
-	HasSpoiler        bool   `json:"has_spoiler,omitempty"`
-	Duration          int    `json:"duration,omitempty"`           // For videos
-	Width             int    `json:"width,omitempty"`              // For videos
-	Height            int    `json:"height,omitempty"`             // For videos
-	SupportsStreaming bool   `json:"supports_streaming,omitempty"` // For videos
+	Type              string    `json:"type"`  // "photo", "video", etc.
+	Media             string    `json:"media"` // file_id or "attach://<file_name>"
+	Caption           string    `json:"caption,omitempty"`
+	ParseMode         ParseMode `json:"parse_mode,omitempty"`
+	HasSpoiler        bool      `json:"has_spoiler,omitempty"`
+	Duration          int       `json:"duration,omitempty"`           // For videos
+	Width             int       `json:"width,omitempty"`              // For videos
+	Height            int       `json:"height,omitempty"`             // For videos
+	SupportsStreaming bool      `json:"supports_streaming,omitempty"` // For videos
 }
 
 type SendChatActionRequest struct {
@@ -242,7 +249,7 @@ type CallbackAnswerOptions struct {
 }
 
 type EditMessageOptions struct {
-	ParseMode             string                       `json:"parse_mode,omitempty"`
+	ParseMode             ParseMode                    `json:"parse_mode,omitempty"`
 	DisableWebPagePreview bool                         `json:"disable_web_page_preview,omitempty"`
 	ReplyMarkup           *models.InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }

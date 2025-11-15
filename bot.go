@@ -11,11 +11,6 @@ import (
 	"github.com/harshyadavone/tgx/pkg/logger"
 )
 
-const (
-	ParseModeMarkdown = "MarkdownV2"
-	ParseModeHTML     = "HTML"
-)
-
 type (
 	ErrorHandler    func(ctx *Context, err error)
 	Handler         func(ctx *Context) error
@@ -332,11 +327,11 @@ func (b *Bot) SendMessageWithOpts(req *SendMessageRequest) error {
 	}
 
 	if req.ParseMode != "" {
-		if req.ParseMode != ParseModeHTML && req.ParseMode != ParseModeMarkdown {
+		if req.ParseMode != HTML && req.ParseMode != MarkdownV2 {
 			return &BotError{
 				Code:    http.StatusBadRequest,
-				Message: "Parse mode can be only 'MarkdownV2' or 'HTML'",
-				Err:     fmt.Errorf("Parse mode can be only 'MarkdownV2' or 'HTML'"),
+				Message: "Invalid ParseMode. It must be 'MarkdownV2' or 'HTML'",
+				Err:     fmt.Errorf("invalid ParseMode provided: %s", req.ParseMode),
 			}
 		}
 		payload["parse_mode"] = req.ParseMode
@@ -437,7 +432,7 @@ func (b *Bot) CopyMessageWithOpts(req *CopyMessageRequest) error {
 	}
 
 	if req.ParseMode != "" {
-		if req.ParseMode != ParseModeHTML && req.ParseMode != ParseModeMarkdown {
+		if req.ParseMode != HTML && req.ParseMode != MarkdownV2 {
 			return &BotError{
 				Code:    http.StatusBadRequest,
 				Message: "Parse mode can be only 'MarkdownV2' or 'HTML'",

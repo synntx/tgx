@@ -27,7 +27,7 @@ func (ctx *Context) ReplyWithOpts(req *SendMessageRequest) error {
 		"text":    req.Text,
 	}
 
-	if req.ParseMode != "" {
+	if req.ParseMode == HTML || req.ParseMode == MarkdownV2 {
 		payload["parse_mode"] = req.ParseMode
 	}
 

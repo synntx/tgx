@@ -1,6 +1,8 @@
 package tgx
 
 import (
+	"strings"
+
 	"github.com/harshyadavone/tgx/models"
 )
 
@@ -18,18 +20,34 @@ func (b *Bot) handleCallbackQuery(cb *models.CallbackQuery) error {
 		bot:      b,
 	}
 
+	// check for exact match
 	if handler, ok := b.callbackHandlers[cb.Data]; ok {
 		ctx.bot.logger.Debug("callback handler called")
 		if err := handler(ctx); err != nil {
 			ctx.bot.logger.Error("error in calling handler %w: ", err)
 			return err
 		}
+		return nil
 	}
 
+	// fallback: for prefix
+	for data, handler := range b.callbackHandlers {
+		if strings.HasPrefix(cb.Data, data) {
+			ctx.bot.logger.Debug("callback handler called for prfix: %s", data)
+			if err := handler(ctx); err != nil {
+				ctx.bot.logger.Error("error in calling handler %w: ", err)
+				return err
+			}
+			return nil
+		}
+	}
+
+	ctx.bot.logger.Warn("No callback handler found for data: %s", cb.Data)
 	return nil
 }
 
 func (ctx *CallbackContext) AnswerCallback(opts *CallbackAnswerOptions) error {
+	ctx.bot.logger.Info("Answering callback query")
 	payload := map[string]interface{}{
 		"callback_query_id": ctx.QueryID,
 	}
@@ -60,7 +78,7 @@ func (ctx *CallbackContext) EditMessage(newText string, opts *EditMessageOptions
 	}
 
 	if opts != nil {
-		if opts.ParseMode != "" {
+		if opts.ParseMode == HTML || opts.ParseMode == MarkdownV2 {
 			payload["parse_mode"] = opts.ParseMode
 		}
 		if opts.DisableWebPagePreview {
@@ -89,7 +107,7 @@ func (ctx *CallbackContext) Reply(text string, opts *SendMessageRequest) error {
 	}
 
 	if opts != nil {
-		if opts.ParseMode != "" {
+		if opts.ParseMode == HTML || opts.ParseMode == MarkdownV2 {
 			payload["parse_mode"] = opts.ParseMode
 		}
 		if opts.ReplyMarkup != nil {
